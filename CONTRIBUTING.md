@@ -1,6 +1,6 @@
-# Contributing To pysTDA
+# Contributing To PysTDA
 
-pysTDA is intended as an open platform for developing semi-empirical excited-state methods. Contributions should keep method-specific approximations separate from shared solver and analysis infrastructure.
+PysTDA is intended as an open platform for developing semi-empirical excited-state methods. Contributions should keep method-specific approximations separate from shared solver and analysis infrastructure.
 
 ## Adding A New Method
 

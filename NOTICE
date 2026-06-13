@@ -1,0 +1,18 @@
+pysTDA
+Copyright 2026 Sheng-Rui Wang
+
+This product is licensed under the Apache License, Version 2.0.
+
+This product includes code and formulas adapted from PySCF TD-SCF
+utilities for oscillator strengths, transition multipole contractions,
+and optional Davidson diagonalization integration.
+
+PySCF is a free and open-source quantum chemistry code distributed under
+the Apache License, Version 2.0.
+
+PySCF copyright notice:
+Copyright 2014-2024 The PySCF Developers.
+
+PySCF project:
+https://pyscf.org
+https://github.com/pyscf/pyscf

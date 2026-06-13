@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pysTDA"
+version = "0.1.0"
+description = "An open platform for semi-empirical excited-state TDA methods."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Sheng-Rui Wang"}
+]
+dependencies = [
+    "numpy",
+    "scipy",
+]
+keywords = [
+    "computational chemistry",
+    "excited states",
+    "semi-empirical",
+    "TDA",
+    "sTDA",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+
+[project.optional-dependencies]
+pyscf = ["pyscf"]
+
+[tool.setuptools]
+py-modules = [
+    "global_param",
+    "simplified_int",
+    "sTDA",
+    "system_env",
+    "TDA_base",
+    "utils",
+    "XsTDA",
+]

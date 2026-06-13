@@ -1,6 +1,6 @@
-# pysTDA
+# PysTDA
 
-pysTDA is an open, PySCF-compatible platform for prototyping semi-empirical excited-state methods. It separates method-specific approximations for the Tamm-Dancoff approximation (TDA) matrix from shared solver and analysis infrastructure, making it straightforward to test new approximations while reusing dense diagonalization, Davidson iteration, PySCF checkpoint loading, and oscillator-strength utilities.
+PysTDA is an open, PySCF-compatible platform for prototyping semi-empirical excited-state methods. It separates method-specific approximations for the Tamm-Dancoff approximation (TDA) matrix from shared solver and analysis infrastructure, making it straightforward to test new approximations while reusing dense diagonalization, Davidson iteration, PySCF checkpoint loading, and oscillator-strength utilities.
 
 ## Features
 
@@ -51,4 +51,4 @@ The shared base class handles eigenvalue solvers, conversion to full occupied-vi
 
 ## License And Attribution
 
-pysTDA is licensed under Apache-2.0. Portions of the oscillator-strength and transition-multipole logic are adapted from PySCF TD-SCF utilities; see `NOTICE` for attribution.
+PysTDA is licensed under Apache-2.0. Portions of the oscillator-strength and transition-multipole logic are adapted from PySCF TD-SCF utilities; see `NOTICE` for attribution.

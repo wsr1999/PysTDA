@@ -45,7 +45,7 @@ New semi-empirical excited-state methods should subclass `TDA_base`. A method im
 
 - `get_A_matrix()` builds the dense TDA matrix for validation and small systems.
 - `matvec_A(x)` applies the TDA matrix without explicitly building it.
-- `get_diag()` returns the diagonal used by the Davidson preconditioner.
+- `get_diag()` can be overridden to provide an exact matrix-free Davidson preconditioner; the base class uses orbital energy gaps.
 
 The shared base class handles eigenvalue solvers, conversion to full occupied-virtual amplitudes, and oscillator strengths. See `examples/new_method_template.py` for a minimal starting point.
 

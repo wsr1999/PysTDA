@@ -100,7 +100,7 @@ class TDA_base:
         raise NotImplementedError("matvec_A must be implemented in a subclass.")
 
     def get_diag(self):
-        return np.diag(self.get_A_matrix().reshape(self.nov, self.nov)).copy()
+        return self.eia.copy()
 
     def kernel_diag(self):
         A_matrix = self.get_A_matrix().reshape(self.nov, self.nov)
@@ -115,7 +115,10 @@ class TDA_base:
     def kernel_davidson(self, max_cycle=100, tol=1e-6, max_space=20, max_memory=4000, verbose=2):
         lib = _load_pyscf_lib()
         x0 = self._init_guess()
-        precond = lib.make_diag_precond(self.get_diag())
+        diag = np.array(self.get_diag(), dtype=float, copy=True).ravel()
+        if diag.shape != (self.nov,):
+            raise ValueError(f"get_diag must return a vector with shape ({self.nov},).")
+        precond = lib.make_diag_precond(diag)
         max_space = max(int(max_space), self.nroot + 2)
 
         def aop(xs):

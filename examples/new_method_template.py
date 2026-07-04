@@ -13,12 +13,9 @@ class NewSemiEmpiricalTDA(TDA_base):
         super().__init__(mol, singlet=singlet, nroot=nroot)
         self.parameter = parameter
 
-    def get_diag(self):
-        return self.eia.copy()
-
     def get_A_matrix(self):
         A = np.zeros((self.nov, self.nov))
-        A.ravel()[:: self.nov + 1] = self.get_diag()
+        A.ravel()[:: self.nov + 1] = self.eia
         return A.reshape(
             self.mol.nocc_trunc,
             self.mol.nvir_trunc,
@@ -27,4 +24,4 @@ class NewSemiEmpiricalTDA(TDA_base):
         )
 
     def matvec_A(self, x):
-        return self.get_diag() * np.asarray(x)
+        return self.eia * np.asarray(x)

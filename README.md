@@ -50,6 +50,14 @@ New semi-empirical excited-state methods should subclass `TDA_base`. A method im
 
 The shared base class handles eigenvalue solvers, conversion to full occupied-virtual amplitudes, and oscillator strengths. See `examples/new_method_template.py` for a minimal starting point.
 
+## References
+
+If you use PysTDA, please cite the relevant method papers:
+
+- sTDA: S. Grimme, "A simplified Tamm-Dancoff density functional approach for the electronic excitation spectra of very large molecules," J. Chem. Phys. 138, 244104 (2013). https://doi.org/10.1063/1.4811331
+- XsTDA: M. De Wergifosse and S. Grimme, "The eXact integral simplified time-dependent density functional theory (XsTD-DFT)," J. Chem. Phys. 160, 204110 (2024). https://doi.org/10.1063/5.0206380
+- XsTDA for range-separated hybrids: M. De Wergifosse, "Computing excited states of very large systems with range-separated hybrid functionals and the exact integral simplified time-dependent density functional theory (XsTD-DFT)," J. Phys. Chem. Lett. 15, 12628-12635 (2024). https://doi.org/10.1021/acs.jpclett.4c03193
+
 ## License And Attribution
 
 PysTDA is licensed under Apache-2.0. Portions of the oscillator-strength and transition-multipole logic are adapted from PySCF TD-SCF utilities; see `NOTICE` for attribution.

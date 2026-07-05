@@ -8,6 +8,7 @@ Add a new method by subclassing `TDA_base`. The implementation should provide:
 
 - `get_A_matrix()`: dense TDA matrix for small systems and validation.
 - `matvec_A(x)`: matrix-free TDA matrix-vector product for Davidson iteration.
+- optional `matmat_A(X)`: batched matrix-free TDA products for efficient Davidson iteration.
 - optional `get_diag()`: exact matrix-free diagonal for Davidson preconditioning. The base class uses orbital energy gaps.
 
 Keep method parameters explicit in the class constructor and cache expensive intermediates only when they are reused.
@@ -17,6 +18,7 @@ Keep method parameters explicit in the class constructor and cache expensive int
 New methods should include tests that:
 
 - compare `matvec_A(x)` against explicit dense multiplication from `get_A_matrix()`;
+- compare `matmat_A(X)` against column-by-column `matvec_A(x)`;
 - compare `kernel_davidson()` roots against `kernel_diag()` roots on a small system;
 - cover singlet/triplet or range-separated branches when applicable;
 - verify clear errors for optional dependencies.

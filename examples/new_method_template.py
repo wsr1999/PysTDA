@@ -25,3 +25,9 @@ class NewSemiEmpiricalTDA(TDA_base):
 
     def matvec_A(self, x):
         return self.eia * np.asarray(x)
+
+    def matmat_A(self, X):
+        X = np.asarray(X)
+        if X.ndim == 1:
+            return self.matvec_A(X)
+        return self.eia[:, None] * X

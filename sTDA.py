@@ -96,3 +96,31 @@ class sTDA(TDA_base):
         gamma_m = np.einsum("AB,Bja->Aja", self.gammaJ, m, optimize=True)
         Ax -= np.einsum("Aij,Aja->ia", L_oo, gamma_m, optimize=True)
         return Ax.ravel()
+
+    def matmat_A(self, X):
+        X = np.asarray(X)
+        if X.ndim == 1:
+            return self.matvec_A(X)
+        if X.ndim != 2 or X.shape[0] != self.nov:
+            raise ValueError(f"X must have shape ({self.nov}, nvec).")
+
+        mol = self.mol
+        no = mol.nocc_trunc
+        nv = mol.nvir_trunc
+        nvec = X.shape[1]
+        zs = X.T.reshape(nvec, no, nv)
+        eia = self.eia.reshape(no, nv)
+        L_oo = self._get_L_oo()
+        L_vv = self._get_L_vv()
+
+        AX = np.einsum("xia,ia->xia", zs, eia, optimize=True)
+        if self.singlet:
+            L_ov = self._get_L_ov()
+            y = np.einsum("Bjb,xjb->xB", L_ov, zs, optimize=True)
+            gamma_y = np.einsum("AB,xB->xA", self.gammaK, y, optimize=True)
+            AX += 2.0 * np.einsum("Aia,xA->xia", L_ov, gamma_y, optimize=True)
+
+        m = np.einsum("Bab,xjb->xBja", L_vv, zs, optimize=True)
+        gamma_m = np.einsum("AB,xBja->xAja", self.gammaJ, m, optimize=True)
+        AX -= np.einsum("Aij,xAja->xia", L_oo, gamma_m, optimize=True)
+        return AX.reshape(nvec, -1).T

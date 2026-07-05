@@ -99,6 +99,16 @@ class TDA_base:
     def matvec_A(self, x):
         raise NotImplementedError("matvec_A must be implemented in a subclass.")
 
+    def matmat_A(self, X):
+        X = np.asarray(X)
+        if X.ndim == 1:
+            return self.matvec_A(X)
+        if X.ndim != 2 or X.shape[0] != self.nov:
+            raise ValueError(f"X must have shape ({self.nov}, nvec).")
+        if X.shape[1] == 0:
+            return np.empty((self.nov, 0), dtype=X.dtype)
+        return np.column_stack([self.matvec_A(X[:, i]) for i in range(X.shape[1])])
+
     def get_diag(self):
         return self.eia.copy()
 
@@ -122,7 +132,30 @@ class TDA_base:
         max_space = max(int(max_space), self.nroot + 2)
 
         def aop(xs):
-            return [self.matvec_A(x) for x in xs]
+            if isinstance(xs, np.ndarray):
+                if xs.ndim == 1:
+                    X = xs.reshape(self.nov, 1)
+                elif xs.ndim == 2 and xs.shape[1] == self.nov:
+                    X = xs.T
+                elif xs.ndim == 2 and xs.shape[0] == self.nov:
+                    X = xs
+                else:
+                    raise ValueError(
+                        "Davidson trial vectors must have shape "
+                        f"({self.nov}, nvec) or (nvec, {self.nov})."
+                    )
+            else:
+                xs = list(xs)
+                if len(xs) == 0:
+                    return []
+                X = np.column_stack([np.asarray(x).ravel() for x in xs])
+                if X.shape[0] != self.nov:
+                    raise ValueError(f"Davidson trial vectors must have length {self.nov}.")
+
+            AX = np.asarray(self.matmat_A(X))
+            if AX.shape != X.shape:
+                raise ValueError(f"matmat_A must return shape {X.shape}, got {AX.shape}.")
+            return [AX[:, i].copy() for i in range(AX.shape[1])]
 
         conv, eigvals, eigvecs = lib.davidson1(aop, x0, precond, tol=tol, max_cycle=max_cycle,
                                                max_space=max_space, max_memory=max_memory, 

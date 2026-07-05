@@ -115,3 +115,34 @@ class XsTDA(TDA_base):
             jm_sr = np.einsum("uv,vja->uja", self.J_sr, m, optimize=True)
             Ax -= self.betax * np.einsum("uij,uja->ia", L_oo, jm_sr, optimize=True)
         return Ax.ravel()
+
+    def matmat_A(self, X):
+        X = np.asarray(X)
+        if X.ndim == 1:
+            return self.matvec_A(X)
+        if X.ndim != 2 or X.shape[0] != self.nov:
+            raise ValueError(f"X must have shape ({self.nov}, nvec).")
+
+        mol = self.mol
+        no = mol.nocc_trunc
+        nv = mol.nvir_trunc
+        nvec = X.shape[1]
+        zs = X.T.reshape(nvec, no, nv)
+        eia = self.eia.reshape(no, nv)
+
+        AX = np.einsum("xia,ia->xia", zs, eia, optimize=True)
+        if self.singlet:
+            y = np.einsum("ua,xia->xui", self.C_vir, zs, optimize=True)
+            z = np.einsum("ui,xui->xu", self.C_occ, y, optimize=True)
+            jz = np.einsum("uv,xv->xu", self.J, z, optimize=True)
+            AX += 2.0 * np.einsum(
+                "ui,xu,ua->xia", self.C_occ, jz, self.C_vir, optimize=True
+            )
+
+        q = np.einsum("ui,xia,va->xuv", self.C_occ, zs, self.C_vir, optimize=True)
+        tj = np.einsum("uv,xuv,va->xua", self.J, q, self.C_vir, optimize=True)
+        AX -= self.ax * np.einsum("ui,xua->xia", self.C_occ, tj, optimize=True)
+        if self.do_RSH:
+            tsr = np.einsum("uv,xuv,va->xua", self.J_sr, q, self.C_vir, optimize=True)
+            AX -= self.betax * np.einsum("ui,xua->xia", self.C_occ, tsr, optimize=True)
+        return AX.reshape(nvec, -1).T

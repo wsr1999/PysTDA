@@ -74,6 +74,7 @@ class TDA_base:
         self.X = None
         self.X_full = None
         self.f = None
+        self.hdiag = None
         self.L_oo = None
         self.L_vv = None
         self.L_ov = None
@@ -112,6 +113,14 @@ class TDA_base:
     def get_diag(self):
         return self.eia.copy()
 
+    def _get_hdiag(self):
+        if self.hdiag is None:
+            hdiag = np.array(self.get_diag(), dtype=float, copy=True).ravel()
+            if hdiag.shape != (self.nov,):
+                raise ValueError(f"get_diag must return a vector with shape ({self.nov},).")
+            self.hdiag = hdiag
+        return self.hdiag
+
     def kernel_diag(self):
         A_matrix = self.get_A_matrix().reshape(self.nov, self.nov)
         kwargs = {"check_finite": False, "overwrite_a": True}
@@ -125,10 +134,7 @@ class TDA_base:
     def kernel_davidson(self, max_cycle=100, tol=1e-6, max_space=20, max_memory=4000, verbose=2):
         lib = _load_pyscf_lib()
         x0 = self._init_guess()
-        diag = np.array(self.get_diag(), dtype=float, copy=True).ravel()
-        if diag.shape != (self.nov,):
-            raise ValueError(f"get_diag must return a vector with shape ({self.nov},).")
-        precond = lib.make_diag_precond(diag)
+        precond = lib.make_diag_precond(self._get_hdiag())
         max_space = max(int(max_space), self.nroot + 2)
 
         def aop(xs):

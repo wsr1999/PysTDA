@@ -48,7 +48,7 @@ New semi-empirical excited-state methods should subclass `TDA_base`. A method im
 - `matmat_A(X)` can be overridden to batch Davidson matrix products for `X.shape == (nov, nvec)`.
 - `get_diag()` can be overridden to provide an exact matrix-free Davidson preconditioner; the base class uses orbital energy gaps.
 
-The shared base class handles eigenvalue solvers, conversion to full occupied-virtual amplitudes, and oscillator strengths. See `examples/new_method_template.py` for a minimal starting point.
+The Davidson solver caches the diagonal preconditioner, so construct a new solver object if method parameters or molecular orbital data are changed. The shared base class handles eigenvalue solvers, conversion to full occupied-virtual amplitudes, and oscillator strengths. See `examples/new_method_template.py` for a minimal starting point.
 
 ## References
 

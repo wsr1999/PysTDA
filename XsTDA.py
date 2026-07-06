@@ -81,39 +81,54 @@ class XsTDA(TDA_base):
     def get_diag(self):
         no = self.mol.nocc_trunc
         nv = self.mol.nvir_trunc
-        L_oo = self._get_L_oo()
-        L_vv = self._get_L_vv()
 
         diag = self.eia.reshape(no, nv).copy()
-        diag -= self.ax * np.einsum("uii,vaa,uv->ia", L_oo, L_vv, self.J, optimize=True)
+        C_occ_sq = self.C_occ * self.C_occ
+        C_vir_sq = self.C_vir * self.C_vir
+
+        diag -= self.ax * (C_occ_sq.T @ (self.J @ C_vir_sq))
         if self.do_RSH:
-            diag -= self.betax * np.einsum(
-                "uii,vaa,uv->ia", L_oo, L_vv, self.J_sr, optimize=True
-            )
+            diag -= self.betax * (C_occ_sq.T @ (self.J_sr @ C_vir_sq))
         if self.singlet:
-            L_ov = self._get_L_ov()
-            diag += 2.0 * np.einsum("uia,via,uv->ia", L_ov, L_ov, self.J, optimize=True)
+            diag += 2.0 * self._get_exchange_diag()
         return diag.ravel()
+
+    def _get_exchange_diag(self):
+        no = self.mol.nocc_trunc
+        nv = self.mol.nvir_trunc
+        diag = np.empty((no, nv), dtype=np.result_type(self.C_occ, self.C_vir, self.J))
+
+        if no <= nv:
+            for i in range(no):
+                weighted_vir = self.C_vir * self.C_occ[:, i:i + 1]
+                j_weighted_vir = self.J @ weighted_vir
+                diag[i, :] = np.einsum("ua,ua->a", weighted_vir, j_weighted_vir, optimize=True)
+        else:
+            for a in range(nv):
+                weighted_occ = self.C_occ * self.C_vir[:, a:a + 1]
+                j_weighted_occ = self.J @ weighted_occ
+                diag[:, a] = np.einsum("ui,ui->i", weighted_occ, j_weighted_occ, optimize=True)
+        return diag
 
     def matvec_A(self, x):
         mol = self.mol
         x = np.asarray(x).reshape(mol.nocc_trunc, mol.nvir_trunc)
         Ax = self.eia.reshape(mol.nocc_trunc, mol.nvir_trunc) * x
 
-        L_oo = self._get_L_oo()
-        L_vv = self._get_L_vv()
         if self.singlet:
-            L_ov = self._get_L_ov()
-            y = np.einsum("vjb,jb->v", L_ov, x, optimize=True)
-            jy = self.J @ y
-            Ax += 2.0 * np.einsum("uia,u->ia", L_ov, jy, optimize=True)
+            y = np.einsum("ua,ia->ui", self.C_vir, x, optimize=True)
+            z = np.einsum("ui,ui->u", self.C_occ, y, optimize=True)
+            jz = self.J @ z
+            Ax += 2.0 * np.einsum(
+                "ui,u,ua->ia", self.C_occ, jz, self.C_vir, optimize=True
+            )
 
-        m = np.einsum("vab,jb->vja", L_vv, x, optimize=True)
-        jm = np.einsum("uv,vja->uja", self.J, m, optimize=True)
-        Ax -= self.ax * np.einsum("uij,uja->ia", L_oo, jm, optimize=True)
+        q = np.einsum("ui,ia,va->uv", self.C_occ, x, self.C_vir, optimize=True)
+        tj = np.einsum("uv,uv,va->ua", self.J, q, self.C_vir, optimize=True)
+        Ax -= self.ax * np.einsum("ui,ua->ia", self.C_occ, tj, optimize=True)
         if self.do_RSH:
-            jm_sr = np.einsum("uv,vja->uja", self.J_sr, m, optimize=True)
-            Ax -= self.betax * np.einsum("uij,uja->ia", L_oo, jm_sr, optimize=True)
+            tsr = np.einsum("uv,uv,va->ua", self.J_sr, q, self.C_vir, optimize=True)
+            Ax -= self.betax * np.einsum("ui,ua->ia", self.C_occ, tsr, optimize=True)
         return Ax.ravel()
 
     def matmat_A(self, X):

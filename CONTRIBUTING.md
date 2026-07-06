@@ -12,6 +12,7 @@ Add a new method by subclassing `TDA_base`. The implementation should provide:
 - optional `get_diag()`: exact matrix-free diagonal for Davidson preconditioning. The base class uses orbital energy gaps.
 
 Keep method parameters explicit in the class constructor and cache expensive intermediates only when they are reused.
+The Davidson preconditioner diagonal is cached after first use, so method parameters and molecular orbital data should be treated as immutable after solver construction.
 
 ## Tests
 
